@@ -14,29 +14,59 @@ def buscar_herramienta(inventario, nombre):
 
 def carga_inicial(inventario):
     print("\n==============================================")
-    print("Carga de herramientas iniciales")
-
-    try:
-        cantidad = int(input("Ingrese la cantidad de herramientas a cargar: "))
-        if cantidad < 0:
-            raise ValueError("La cantidad no puede ser negativa.")
-    except ValueError as e:
-        print(f"Error: {e}")
-        return
-    except Exception as e:
-        print(f"Error inesperado: {e}")
+    print("Carga de herramientas iniciales\n")
+    # Si el inventario ya tiene elementos, indicar al usuario que use la opción 5
+    if inventario:
+        print("El inventario ya se encuentra inicializado - pase a la Opción n°5 para agregar nuevos productos.\n")
         return
 
-    for carga in range(cantidad):
-        nombre = normalizar_nombre(input(f"Ingrese el nombre de la herramienta n°{carga+1} : "))
+    while True:
         try:
-            stock = int(input("Ingrese el stock inicial: "))
-            if stock < 0:
-                raise ValueError("El stock inicial no puede ser negativo.")
+            cantidad = input("Ingrese la cantidad de herramientas a cargar: ")
+            if not cantidad: 
+                raise ValueError("Error: No ingresaste la cantidad de herramientas. Vuelva a intentarlo...\n")
+            elif int(cantidad) < 0:
+                raise ValueError("Error: La cantidad no puede ser negativa. Vuelva a intentarlo...\n")
+            break
+            
         except ValueError as e:
-            print(f"Error: {e}")
-            return
+            print(f"{e}")
+            continue
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+            continue
+
+    for carga in range(int(cantidad)):
+        # Validar y obtener un nombre válido
+        while True:
+            nombre_raw = input(f"Ingrese el nombre de la herramienta n°{carga+1}: ")
+            nombre = normalizar_nombre(nombre_raw)
+            if not nombre:
+                print("Error: El nombre de la herramienta no puede estar vacío. Vuelva a intentarlo.\n")
+                continue
+            if buscar_herramienta(inventario, nombre):
+                print("Error: Este producto ya se encuentra cargado en el inventario. Ingrese otro nombre.\n")
+                continue
+            break
+
+        # Validar y obtener un stock válido
+        while True:
+            stock = input("Ingrese el stock inicial: ")
+            if not stock:
+                print("Error: No ingresaste la cantidad de herramientas. Vuelva a intentarlo.\n")
+                continue
+            try:
+                stock = int(stock)
+                if stock < 0:
+                    print("Error: El stock inicial no puede ser negativo. Vuelva a intentarlo.\n")
+                    continue
+                break
+            except ValueError:
+                print("Error: Debe ingresar un número entero válido para el stock. Vuelva a intentarlo.\n")
+                continue
+
         inventario.append({"herramienta": nombre, "cantidad": stock})
+        print(f"La herramienta '{nombre}' ha sido agregada con {stock} unidades.\n")
 
 
 def mostrar_inventario(inventario):
@@ -50,7 +80,9 @@ def consultar_stock(inventario):
     print("\n==============================================")
     print("Consulta de stock\n")
     nombre = input("Ingrese el nombre de la herramienta a consultar: ")
+
     herramienta = buscar_herramienta(inventario, nombre)
+
     if herramienta:
         print(f"\nStock de {herramienta['herramienta']}: {herramienta['cantidad']} unidades\n")
     else:
@@ -60,9 +92,11 @@ def agotados(inventario):
     print("\n==============================================")
     print("Articulos agotados:\n")
 
+    if inventario : 
+        print("\nNo se encuentran articulos agotados por el momento...\n")
     for herramienta in inventario:
         if herramienta['cantidad'] == 0 :
-            print(f"La herramienta '{herramienta['herramienta']}' se encuentra agotada.")
+            print(f"La herramienta '{herramienta['herramienta']}' se encuentra agotada. ( Stock : {herramienta['cantidad']})")
 
 
 def carga_nueva(inventario): 
@@ -72,22 +106,22 @@ def carga_nueva(inventario):
     nombre = input("Ingrese el nombre de la herramienta a ingresar: ")
     nombre = normalizar_nombre(nombre)
 
-    # Validar que el nombre no esté vacío
-    if not nombre:
-        print("Error: El nombre de la herramienta no puede estar vacío.\n")
-        return
 
     # Validar que la herramienta no exista ya en el inventario
-    if buscar_herramienta(inventario, nombre):
-        print(f"Error: La herramienta '{nombre}' ya se encuentra en el inventario.\n")
-        return
+    
+        
 
-    # Pedir stock
+    # Validar que el nombre no esté vacio, que la herramienta no exista y pedir stock
     try:
+        if buscar_herramienta(inventario, nombre):
+            raise ValueError ("Error: La herramienta indicada ya se encuentra en el inventario.\n")
+        if not nombre :
+            raise ValueError ("Error: El nombre de la herramienta no puede estar vacío.\n")
+        
         stock = int(input("Ingrese el stock inicial: "))
         if stock < 0:
-            print("Error: El stock no puede ser negativo.\n")
-            return
+            raise ValueError ("Error: El stock no puede ser negativo.\n")
+
     except ValueError:
         print("Error: Debe ingresar un número válido para el stock.\n")
         return
