@@ -3,8 +3,12 @@
 def normalizar_nombre(nombre):
     return nombre.strip().lower() 
 
-def buscar_herramienta():
-    pass
+def buscar_herramienta(inventario, nombre):
+    nombre = normalizar_nombre(nombre)
+    for herramienta in inventario:
+        if herramienta["herramienta"] == nombre:
+            return herramienta
+    return None
 
 # Funciones relativas a las opciones del menú
 
@@ -23,8 +27,8 @@ def carga_inicial(inventario):
         print(f"Error inesperado: {e}")
         return
 
-    for _ in range(cantidad):
-        nombre = normalizar_nombre(input("Ingrese el nombre de la herramienta: "))
+    for carga in range(cantidad):
+        nombre = normalizar_nombre(input(f"Ingrese el nombre de la herramienta n°{carga+1} : "))
         try:
             stock = int(input("Ingrese el stock inicial: "))
             if stock < 0:
@@ -37,18 +41,71 @@ def carga_inicial(inventario):
 
 def mostrar_inventario(inventario):
     print("\n==============================================")
-    print("Inventario:")
+    print("Inventario:\n")
     for herramienta in inventario:
         print(f"- {herramienta['herramienta']}: {herramienta['cantidad']} unidades\n")
 
 
-def consultar_stock():
-    pass
+def consultar_stock(inventario):
+    print("\n==============================================")
+    print("Consulta de stock\n")
+    nombre = input("Ingrese el nombre de la herramienta a consultar: ")
+    herramienta = buscar_herramienta(inventario, nombre)
+    if herramienta:
+        print(f"\nStock de {herramienta['herramienta']}: {herramienta['cantidad']} unidades\n")
+    else:
+        print(f"\nLa herramienta '{nombre}' no se encuentra en el inventario.\n") 
+
+def agotados(inventario): 
+    print("\n==============================================")
+    print("Articulos agotados:\n")
+
+    for herramienta in inventario:
+        if herramienta['cantidad'] == 0 :
+            print(f"La herramienta '{herramienta['herramienta']}' se encuentra agotada.")
+
+
+def carga_nueva(inventario): 
+    print("\n==============================================")
+    print("Alta de nuevo producto:\n")
+
+    nombre = input("Ingrese el nombre de la herramienta a ingresar: ")
+    nombre = normalizar_nombre(nombre)
+
+    # Validar que el nombre no esté vacío
+    if not nombre:
+        print("Error: El nombre de la herramienta no puede estar vacío.\n")
+        return
+
+    # Validar que la herramienta no exista ya en el inventario
+    if buscar_herramienta(inventario, nombre):
+        print(f"Error: La herramienta '{nombre}' ya se encuentra en el inventario.\n")
+        return
+
+    # Pedir stock
+    try:
+        stock = int(input("Ingrese el stock inicial: "))
+        if stock < 0:
+            print("Error: El stock no puede ser negativo.\n")
+            return
+    except ValueError:
+        print("Error: Debe ingresar un número válido para el stock.\n")
+        return
+    except Exception as e:
+        print(f"Error inesperado: {e}\n")
+        return
+
+    # Si todas las validaciones pasaron, agregar a inventario
+    inventario.append({"herramienta": nombre, "cantidad": stock})
+    print(f"La herramienta '{nombre}' ha sido agregada exitosamente con {stock} unidades.\n")
+
+
+
 
 # Funciones estructurales del Menú  
 
 def mostrar_menu():
-    print("\n==============================================")
+    print("==============================================\n")
     print("Menú de opciones:")
     print("1. Carga de herramientas iniciales")
     print("2. Visualización de inventario")
@@ -66,11 +123,11 @@ def ejecutar_menu(opcion, inventario):
         case "2":
             mostrar_inventario(inventario)
         case "3":
-            consultar_stock()
+            consultar_stock(inventario)
         case "4":
-            pass # Reporte de agotados
+            agotados(inventario)
         case "5":
-            pass # Alta de nuevo producto 
+            carga_nueva(inventario) 
         case "6":
             pass # Actualización de stock - venta o ingreso
         case "7":
@@ -85,8 +142,7 @@ def ejecutar_menu(opcion, inventario):
 # Funcion principal del programa y su llamada.
 
 def programa_principal():
-    
-    print("\n==============================================")
+    print("=============== PARCIAL N°2 ==================\n")
     print("Bienvenido al Sistema de Control de Inventarios\n")
     inventario = []
 
