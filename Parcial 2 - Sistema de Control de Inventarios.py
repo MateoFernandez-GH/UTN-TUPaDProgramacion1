@@ -14,10 +14,10 @@ def pregunta(inventario):
     print("\n===============================================")
     print("Actualización de stock (venta / ingreso)\n")
     
-    print("¿ Necesitas vender mercadería, o agregar nuevo stock ? (Escribe 'vender' o 'agregar')\n")
+    print("¿ Necesitas vender mercadería, o agregar nuevo stock ? (Escribe 'vender' o 'agregar'): \n")
     
     while True:
-        respuesta = normalizar_nombre(input())
+        respuesta = normalizar_nombre(input("- "))
 
         match respuesta : 
             case "vender": 
@@ -118,13 +118,15 @@ def agotados(inventario):
     print("\n==============================================")
     print("Articulos agotados:\n")
 
-    
+    no_agotado = False
     for herramienta in inventario:
         if herramienta['cantidad'] == 0 :
             print(f"La herramienta '{herramienta['herramienta']}' se encuentra agotada. ( Stock : {herramienta['cantidad']})\n")
             return herramienta['herramienta'] 
         else :
-            print("No se encuentran productos agotados por el momento.\n")
+            if not no_agotado:
+                print("No se encuentran productos agotados por el momento.\n")
+                no_agotado = True
 
 
 def carga_nueva(inventario): 
@@ -227,7 +229,47 @@ def vender(inventario):
             print(f"Error inesperado: {e}\n")
             continue
 
+def agregar_stock(inventario): 
+    print("\n===============================================")
+    print("Agregar stock al inventario :\n")
 
+    if not inventario:
+        print("El inventario no se ha creado aún. No hay productos para agregar.\n")
+        return
+    
+    # Pedir el nombre de la herramienta a agregar 
+    while True:
+        try : 
+            nombre = input("Indica el nombre del articulo al cual agregar stock : ")
+
+            herramienta = buscar_herramienta(inventario, nombre)
+            if not herramienta: 
+                raise ValueError("El nombre ingresado no se corresponde con uno en el inventario.\n")
+            break
+
+        except ValueError as e : 
+            print(f"{e}")
+            continue
+        except Exception as e:
+            print(f"Error inesperado: {e}\n")
+            continue
+
+    while True: 
+        try : 
+            cantidad = int(input("Indica la cantidad de productos a ingresar para actualizar el stock : "))
+            if cantidad < 0 : 
+                raise ValueError("Error: No puedes ingresar un numero negativo.\n")
+            stock = herramienta['cantidad'] + cantidad 
+            break
+        except ValueError : 
+            print("Error: Debe ingresar un número entero válido. Intente nuevamente.\n")
+            continue
+        except Exception as e:
+            print(f"Error inesperado: {e}\n")
+            continue
+    
+    print(f"""\nA la herramienta '{herramienta['herramienta']}' se le han agregado exitosamente {cantidad} unidades.
+Stock Total : {stock}""")
 
 # Funciones estructurales del Menú  
 
