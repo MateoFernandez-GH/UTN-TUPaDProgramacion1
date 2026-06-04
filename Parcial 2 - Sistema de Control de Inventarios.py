@@ -1,28 +1,41 @@
-# Funciones auxiliares
+# FUNCIONES AUXILIARES
 
 def normalizar_nombre(nombre):
+    # Normaliza el nombre de la herramienta (elimina espacios en blanco y convierte a minúsculas)
     return nombre.strip().lower() 
 
-def buscar_herramienta(inventario, nombre):
-    nombre = normalizar_nombre(nombre)
+# Función para buscar una herramienta en el inventario por su nombre (ya normalizado)
+def buscar_herramienta(inventario, nombre): 
+    nombre = normalizar_nombre(nombre) 
     for herramienta in inventario:
-        if herramienta["herramienta"] == nombre:
+        # La comparación se hace con el nombre normalizado de la herramienta en el inventario
+        if herramienta["herramienta"] == nombre: 
+            # Si se encuentra la herramienta, se retorna el diccionario completo de esa herramienta (con su nombre y cantidad)
             return herramienta
+    # Si no se encuentra la herramienta, se retorna None (lo que significaria que no existe en el inventario...)
     return None
 
+# Función para redirigir al usuario hacia la función correspondiente según la respuesta del usuario : venta o ingreso de stock.
 def pregunta(inventario): 
     print("\n===============================================")
     print("Actualización de stock (venta / ingreso)\n")
     
+    # Antes de preguntar al usuario, verificamos que el inventario no esté vacío. Si lo está, indicamos al usuario que debe cargar productos primero.
+    if not inventario: 
+        print("Aun no tienes un inventario cargado. Selecciona la Opción n°1 para agregar los primeros productos")
+        return
+    
     print("¿ Necesitas vender mercadería, o agregar nuevo stock ? (Escribe 'vender' o 'agregar'): \n")
     
+    # El bucle se repetirá hasta que el usuario ingrese una respuesta válida ('vender' o 'agregar'). Si la respuesta es válida, se llamará a la función 
+    # correspondiente y se romperá el bucle. Si la respuesta no es válida, se mostrará un mensaje de error y se volverá a preguntar.
     while True:
         respuesta = normalizar_nombre(input("- "))
 
         match respuesta : 
             case "vender": 
                 vender(inventario)
-                break
+                break  # Los break se utilizan para salir de este bucle, evitando que se vuelva a preguntar después de ejecutar la función correspondiente.
             case "agregar": 
                 agregar_stock(inventario)
                 break
@@ -32,12 +45,9 @@ def pregunta(inventario):
             
 
 
+# FUNCIONES PRINCIPALES DEL PROGRAMA
 
-
-
-
-# Funciones relativas a las opciones del menú
-
+# Es la funcion que se encarga de la carga inicial del inventario, permitiendo al usuario ingresar una cantidad de herramientas y sus respectivos stocks.
 def carga_inicial(inventario):
     print("\n==============================================")
     print("Carga de herramientas iniciales\n")
@@ -47,6 +57,8 @@ def carga_inicial(inventario):
         return
 
     while True:
+        # Bloque try-except para validar que el usuario ingrese una cantidad válida de herramientas a cargar. Se verifica que la entrada no esté vacía 
+        # y que sea un número entero no negativo.
         try:
             cantidad = input("Ingrese la cantidad de herramientas a cargar: ")
             if not cantidad: 
@@ -55,6 +67,8 @@ def carga_inicial(inventario):
                 raise ValueError("Error: La cantidad no puede ser negativa. Vuelva a intentarlo...\n")
             break
             
+        # Se capturan errores específicos de validación (ValueError) y se muestra un mensaje de error al usuario, permitiéndole volver a intentar. Asimismo 
+        # se captura cualquier otro error inesperado.
         except ValueError as e:
             print(f"{e}")
             continue
@@ -65,8 +79,11 @@ def carga_inicial(inventario):
     for carga in range(int(cantidad)):
         # Validar y obtener un nombre válido
         while True:
-            nombre_raw = input(f"Ingrese el nombre de la herramienta n°{carga+1}: ")
-            nombre = normalizar_nombre(nombre_raw)
+            # Solicitamos al usuario que ingrese el nombre de la herramienta, luego normalizamos el nombre para eliminar espacios y convertirlo a minúsculas.
+            nombre = input(f"Ingrese el nombre de la herramienta n°{carga+1}: ")
+            nombre = normalizar_nombre(nombre)
+            # Validamos que el nombre no esté vacío y que no exista ya en el inventario. Si alguna de estas condiciones no se cumple, se muestra un mensaje de error 
+            # y se vuelve a solicitar el nombre.
             if not nombre:
                 print("Error: El nombre de la herramienta no puede estar vacío. Vuelva a intentarlo.\n")
                 continue
@@ -78,6 +95,8 @@ def carga_inicial(inventario):
         # Validar y obtener un stock válido
         while True:
             stock = input("Ingrese el stock inicial: ")
+            # Validamos que el stock no esté vacío, que sea un número entero y que no sea negativo. Caso contrario, se muestran mensajes de error y se vuelve a solicitar 
+            # el stock.
             if not stock:
                 print("Error: No ingresaste la cantidad de herramientas. Vuelva a intentarlo.\n")
                 continue
@@ -90,45 +109,65 @@ def carga_inicial(inventario):
             except ValueError:
                 print("Error: Debe ingresar un número entero válido para el stock. Vuelva a intentarlo.\n")
                 continue
-
+        # Si todas las validaciones 'pasaron', se agrega la herramienta al inventario como un diccionario con su nombre y cantidad.
         inventario.append({"herramienta": nombre, "cantidad": stock})
         print(f"La herramienta '{nombre}' ha sido agregada con {stock} unidades.\n")
 
-
+# Función para mostrar el inventario actual. Si el inventario está vacío, se muestra un mensaje indicando que no hay productos cargados.
 def mostrar_inventario(inventario):
     print("\n==============================================")
     print("Inventario:\n")
+
+    if not inventario: 
+        print("Aun no tienes un inventario cargado. Selecciona la Opción n°1 para agregar los primeros productos")
+        return
+    # Bucle for que recorre cada herramienta en el inventario y muestra su nombre y cantidad. Se formatea el print para que sea claro y legible.
     for herramienta in inventario:
         print(f"- {herramienta['herramienta']}: {herramienta['cantidad']} unidades\n")
 
-
+# Funcion que consulta el stock de una herramienta específica. Se solicita al usuario que ingrese el nombre de la herramienta a consultar, se busca en el inventario 
+# y se muestra su cantidad actual. 
 def consultar_stock(inventario):
     print("\n==============================================")
     print("Consulta de stock\n")
+
+    if not inventario: 
+        print("Aun no tienes un inventario cargado. Selecciona la Opción n°1 para agregar los primeros productos")
+        return
+    
     nombre = input("Ingrese el nombre de la herramienta a consultar: ")
 
-    herramienta = buscar_herramienta(inventario, nombre)
+    herramienta = buscar_herramienta(inventario, nombre) # Reutilizamos esta funcion para la busqueda de la herramienta, y retornarla en caso de exito. 
 
+    # Si la herramienta existe, se muestra su stock actual. Si no existe, se muestra un mensaje indicando que la herramienta no se encuentra en el inventario.
     if herramienta:
         print(f"\nStock de {herramienta['herramienta']}: {herramienta['cantidad']} unidades\n")
     else:
         print(f"\nLa herramienta '{nombre}' no se encuentra en el inventario.\n") 
 
+# Funcion que muestra un reporte de aquelos productos agotados (con stock 0). Si el inventario está vacío, se muestra un mensaje indicando que no hay productos cargados. 
+# Si no hay productos agotados, se muestra un mensaje indicando que todos los productos tienen stock disponible.
 def agotados(inventario): 
     print("\n==============================================")
     print("Articulos agotados:\n")
 
-    no_agotado = False
+    if not inventario: 
+        print("Aun no tienes un inventario cargado. Selecciona la Opción n°1 para agregar los primeros productos")
+        return
+    
+    no_agotado = False # Utilizamos una variable bandera para controlar si se encontraron o no productos agotados. Si al finalizar el bucle esta variable sigue siendo False, 
+    # significa que no se encontraron productos agotados y se muestra el mensaje correspondiente.
     for herramienta in inventario:
         if herramienta['cantidad'] == 0 :
             print(f"La herramienta '{herramienta['herramienta']}' se encuentra agotada. ( Stock : {herramienta['cantidad']})\n")
             return herramienta['herramienta'] 
         else :
             if not no_agotado:
-                print("No se encuentran productos agotados por el momento.\n")
-                no_agotado = True
+                print("No se encuentran productos agotados por el momento / Todos los productos tienen stock disponible.\n")
+                no_agotado = True # Actualizacion de la bandera booleana, para evitar que se muestre el mensaje cada vez que el bucle itera sobre un producto con 
+                # stock disponible.
 
-
+# Función para agregar un nuevo producto al inventario. Se solicita al usuario que ingrese el nombre de la herramienta a agregar y su stock inicial.
 def carga_nueva(inventario): 
     print("\n==============================================")
     print("Alta de nuevo producto:\n")
@@ -142,7 +181,7 @@ def carga_nueva(inventario):
         nombre = input("Ingrese el nombre de la herramienta a ingresar: ")
         nombre = normalizar_nombre(nombre)
 
-        # Validar que el nombre no esté vacio, que la herramienta ya exista y pedir stock
+        # Bloque try/except utilizado para validar que el nombre no esté vacio, que la herramienta ya exista y pedir stock
         try:
             if buscar_herramienta(inventario, nombre):
                 raise ValueError ("""Error: La herramienta indicada ya se encuentra en el inventario.
@@ -161,6 +200,8 @@ Para actualizar sus cantidades, pase a la Opcion n°6.""")
     while True : 
         try: 
             stock = int(input("Ingrese el stock inicial: "))
+            # si el stock es negativo, se lanza un error y se muestra un mensaje indicando que el stock no puede ser negativo. Si el stock es válido, se rompe el bucle 
+            # y se continúa con la carga del nuevo producto.
             if stock < 0:
                 raise ValueError ("Error: El stock no puede ser negativo.\n")
             break
@@ -171,11 +212,12 @@ Para actualizar sus cantidades, pase a la Opcion n°6.""")
             print(f"Error inesperado: {e}\n")
             return
 
-    # Si todas las validaciones pasaron, agregar a inventario
+    # Si todas las validaciones pasaron, agrega el nuevo producto al inventario
     inventario.append({"herramienta": nombre, "cantidad": stock})
     print(f"La herramienta '{nombre}' ha sido agregada exitosamente con {stock} unidades.\n")
 
-
+# Funcion para realizar la sustraccion de stock desde el inventario en caso de venta, o la suma de stock en caso de ingreso. Se solicita al usuario que ingrese el nombre 
+# de la herramienta a vender o agregar stock, se busca en el inventario y se actualiza su cantidad según corresponda.
 def vender(inventario):
     print("\n===============================================")
     print("Venta de artículos:\n")
