@@ -1,4 +1,4 @@
-# FUNCIONES AUXILIARES
+# ====FUNCIONES AUXILIARES======================================================================================================================================================
 
 def normalizar_nombre(nombre):
     # Normaliza el nombre de la herramienta (elimina espacios en blanco y convierte a minúsculas)
@@ -45,7 +45,7 @@ def pregunta(inventario):
             
 
 
-# FUNCIONES PRINCIPALES DEL PROGRAMA
+# ====FUNCIONES PRINCIPALES DEL PROGRAMA=========================================================================================================================================
 
 # Es la funcion que se encarga de la carga inicial del inventario, permitiendo al usuario ingresar una cantidad de herramientas y sus respectivos stocks.
 def carga_inicial(inventario):
@@ -189,7 +189,7 @@ Para actualizar sus cantidades, pase a la Opcion n°6.""")
             if not nombre :
                 raise ValueError ("Error: El nombre de la herramienta no puede estar vacío.\n")
             break
-        except Exception as e:
+        except ValueError as e:
             print(f"{e}\n")
             continue
         except Exception as e:
@@ -199,15 +199,17 @@ Para actualizar sus cantidades, pase a la Opcion n°6.""")
     
     while True : 
         try: 
-            stock = int(input("Ingrese el stock inicial: "))
+            stock = input("Ingrese el stock inicial: ").strip() # Utilizamos strip aqui para eliminar espacios en blanco al inicio o al final de la entrada del usuario.
+            stock = int(stock)
             # si el stock es negativo, se lanza un error y se muestra un mensaje indicando que el stock no puede ser negativo. Si el stock es válido, se rompe el bucle 
             # y se continúa con la carga del nuevo producto.
             if stock < 0:
-                raise ValueError ("Error: El stock no puede ser negativo.\n")
+                print("Error: El stock no puede ser negativo.\n")
+                continue
             break
         except ValueError:
             print("Error: Debe ingresar un número válido para el stock.\n")
-            return
+            continue
         except Exception as e:
             print(f"Error inesperado: {e}\n")
             return
@@ -231,9 +233,13 @@ def vender(inventario):
         try : 
             seleccion = normalizar_nombre(input("Ingrese el nombre de la herramienta a vender: "))
 
+            # Usamos la funcion de busqueda para verificar que la herramienta exista en el inventario, y ademas para retornar el diccionario completo de la herramienta, lo 
+            # que nos permitira acceder a su cantidad actual y realizar la sustraccion correspondiente. 
             herramienta = buscar_herramienta(inventario, seleccion)
             if not herramienta:
                 raise ValueError("Error: La herramienta seleccionada no se encuentra en el inventario.\n")
+            # Si la cantidad de la herramienta es 0, se lanza un error indicando que el artículo se encuentra sin stock (agotado), y se vuelve a solicitar el nombre 
+            # de la herramienta a vender.
             if herramienta['cantidad'] == 0:
                 raise ValueError("Error: El artículo seleccionado se encuentra sin stock (agotado).\n")
             break
@@ -246,23 +252,24 @@ def vender(inventario):
 
     # Pedir cantidad a vender
     while True:
+        # En este bloque try/except se valida que la cantidad ingresada sea un número entero válido y mayor a 0. Si la cantidad es válida, se realiza la sustracción del stock. 
         try : 
             cantidad = int(input("Ingrese la cantidad a vender: "))
             if cantidad <= 0:
-                print("Error: La cantidad a vender debe ser mayor a 0. Intente nuevamente.\n")
+                print("\nError: La cantidad a vender debe ser mayor a 0. Intente nuevamente.\n")
                 continue
             
-            # Realizar la sustracción
+            # Realizamos la sustracción verificando que la cantidad no supere el stock actual. Si la cantidad a vender es mayor al stock actual, se muestra una advertencia.
             stock_actual = herramienta['cantidad']
+            
             if cantidad > stock_actual:
-                print(f"Advertencia: Solo hay {stock_actual} unidades disponibles.")
-                print(f"Se venderán {stock_actual} unidades y el artículo quedará sin stock.\n")
-                herramienta['cantidad'] = 0
+                print(f"Advertencia: La cantidad a vender ({cantidad}) supera el stock actual ({stock_actual}). No se puede realizar la venta.\n")
+                continue
             else:
                 herramienta['cantidad'] -= cantidad
                 print(f"Venta realizada. Se vendieron {cantidad} unidades.")
-                print(f"Stock actual de '{herramienta['herramienta']}': {herramienta['cantidad']} unidades.\n")
-            break
+                print(f"\nStock actual de '{herramienta['herramienta']}': {herramienta['cantidad']} unidades.\n")
+                break
 
         except ValueError:
             print("Error: Debe ingresar un número entero válido. Intente nuevamente.\n")
@@ -296,11 +303,14 @@ def agregar_stock(inventario):
             print(f"Error inesperado: {e}\n")
             continue
 
+    # Pedimos la cantidad a agregar, validando que sea un número entero válido y no negativo. Si la cantidad es válida, se realiza la suma al stock actual de la herramienta.
     while True: 
         try : 
-            cantidad = int(input("Indica la cantidad de productos a ingresar para actualizar el stock : "))
+            cantidad = input("Indica la cantidad de productos a ingresar para actualizar el stock : ").strip()
+            cantidad = int(cantidad)
             if cantidad < 0 : 
-                raise ValueError("Error: No puedes ingresar un numero negativo.\n")
+                print("Error: No puedes ingresar un numero negativo.\n")
+                continue
             stock = herramienta['cantidad'] + cantidad 
             break
         except ValueError : 
@@ -308,13 +318,14 @@ def agregar_stock(inventario):
             continue
         except Exception as e:
             print(f"Error inesperado: {e}\n")
-            continue
+            return
     
     print(f"""\nA la herramienta '{herramienta['herramienta']}' se le han agregado exitosamente {cantidad} unidades.
 Stock Total : {stock}""")
 
-# Funciones estructurales del Menú  
+# ====FUNCOINES ESTRUCTURALES DEL MENU===========================================================================================================================================
 
+# Funcion que muestra las opciones del menú al usuario. Se llama en cada iteración del bucle principal para que el usuario pueda seleccionar una opción. 
 def mostrar_menu():
     print("==============================================\n")
     print("Menú de opciones:")
@@ -326,9 +337,13 @@ def mostrar_menu():
     print("6. Actualizacion de stock (venta / ingreso)")
     print("7. Salir\n")
 
+
+# Función que ejecuta la opción seleccionada por el usuario. Se utiliza un bloque match-case para llamar a la función correspondiente según la opción ingresada. 
+# Si la opción es válida, se ejecuta la función. Si la opción es "7", se muestra un mensaje de despedida y se retorna False para indicar que el programa debe finalizar. 
+# Si la opción no es válida, se muestra un mensaje de error y se retorna True para continuar el programa.
 def ejecutar_menu(opcion, inventario):
     
-    match opcion :
+    match opcion.strip() :
         case "1":
             carga_inicial(inventario)
         case "2":
@@ -350,7 +365,7 @@ def ejecutar_menu(opcion, inventario):
     # Retorna verdadero para continuar el programa, con cualquier opción excepto la de salir.
     return True  
 
-# Funcion principal del programa y su llamada.
+# Funcion principal del programa y su llamada...
 
 def programa_principal():
     print("=============== PARCIAL N°2 ==================\n")
@@ -358,6 +373,8 @@ def programa_principal():
     inventario = []
 
     while True : 
+        # En cada iteración del bucle, se muestra el menú al usuario, se solicita una opción y se ejecuta la función correspondiente. Si el usuario selecciona la opción 
+        # de salir, el programa finalizará.
         mostrar_menu()
         opcion = input("Seleccione una opción: ")
         continuar = ejecutar_menu(opcion, inventario)
@@ -365,7 +382,7 @@ def programa_principal():
             break
 
 
-
+# Llamada a la función principal para iniciar el programa.
 programa_principal()
 
 
