@@ -160,12 +160,12 @@ def agotados(inventario):
     for herramienta in inventario:
         if herramienta['cantidad'] == 0 :
             print(f"La herramienta '{herramienta['herramienta']}' se encuentra agotada. ( Stock : {herramienta['cantidad']})\n")
-            return herramienta['herramienta'] 
-        else :
-            if not no_agotado:
-                print("No se encuentran productos agotados por el momento / Todos los productos tienen stock disponible.\n")
-                no_agotado = True # Actualizacion de la bandera booleana, para evitar que se muestre el mensaje cada vez que el bucle itera sobre un producto con 
-                # stock disponible.
+            no_agotado = True
+    
+    if not no_agotado:
+        print("No se encuentran productos agotados por el momento / Todos los productos tienen stock disponible.\n")
+        no_agotado = True # Actualizacion de la bandera booleana, para evitar que se muestre el mensaje cada vez que el bucle itera sobre un producto con 
+        # stock disponible.
 
 # Función para agregar un nuevo producto al inventario. Se solicita al usuario que ingrese el nombre de la herramienta a agregar y su stock inicial.
 def carga_nueva(inventario): 
@@ -383,6 +383,7 @@ def programa_principal():
 
 
 # Llamada a la función principal para iniciar el programa.
+
 programa_principal()
 
 
